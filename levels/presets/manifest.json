@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "presets": [
+    {
+      "id": "petri",
+      "name": "Petri Dish",
+      "music": "calm",
+      "desc": "A small bowl, gentle prey. The starter aquarium.",
+      "file": "petri-dish.json"
+    },
+    {
+      "id": "hunting",
+      "name": "Hunter Ground",
+      "music": "aurora",
+      "desc": "Mid-sized arena with a hostile pack.",
+      "file": "hunter-ground.json"
+    },
+    {
+      "id": "underdog",
+      "name": "Underdog",
+      "music": "glacial",
+      "desc": "You start small. Many giants. Grow or die.",
+      "file": "underdog.json"
+    },
+    {
+      "id": "twin",
+      "name": "Twin Stars",
+      "music": "tide",
+      "desc": "Two gravity wells. Slingshot between them.",
+      "file": "twin-stars.json"
+    },
+    {
+      "id": "survive",
+      "name": "Survival 60s",
+      "music": "nebula",
+      "desc": "Stay alive for 60 seconds amid escalating threats.",
+      "file": "survival-60s.json"
+    },
+    {
+      "id": "pacifist",
+      "name": "Pacifist Garden",
+      "music": "calm",
+      "desc": "Grow without harm — only neutrals around. Become the largest cell.",
+      "file": "pacifist-garden.json"
+    },
+    {
+      "id": "gladiator",
+      "name": "Gladiator",
+      "music": "aurora",
+      "desc": "A confined arena with a single big rival. May the larger absorb.",
+      "file": "gladiator.json"
+    },
+    {
+      "id": "pacify",
+      "name": "Pacify the Field",
+      "music": "glacial",
+      "desc": "Eliminate every cell that thinks. Drifters and field motes can stay.",
+      "file": "pacify-the-field.json"
+    },
+    {
+      "id": "binary",
+      "name": "Binary Whirl",
+      "music": "tide",
+      "desc": "Two co-orbiting wells. Read the figure-eight, find the food.",
+      "file": "binary-whirl.json"
+    }
+  ]
+}

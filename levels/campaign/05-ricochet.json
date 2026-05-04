@@ -1,0 +1,56 @@
+{
+  "type": "sparse",
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 1200,
+    "h": 600
+  },
+  "shape": null,
+  "insideColor": "#0a1828",
+  "outsideColor": "#040a14",
+  "edgeColor": "#8cdcff",
+  "gravityCenters": [],
+  "randomVelocity": false,
+  "victoryCondition": "absorb_all",
+  "victoryParam": 60,
+  "kinds": [],
+  "circles": [
+    {
+      "x": 202.5620882784291,
+      "y": 498.90849995686506,
+      "r": 18,
+      "kind": "player",
+      "hue": 180,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 400.7352941176471,
+      "y": 300.7352941176471,
+      "r": 9,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 862.9276123954411,
+      "y": 206.98529411764702,
+      "r": 9,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1058.6996712189707,
+      "y": 402.7573529411764,
+      "r": 9,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "type": "sparse",
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 1800,
+    "h": 1000
+  },
+  "shape": null,
+  "insideColor": "#0a1828",
+  "outsideColor": "#040a14",
+  "edgeColor": "#8cdcff",
+  "gravityCenters": [],
+  "randomVelocity": false,
+  "victoryCondition": "absorb_all",
+  "victoryParam": 60,
+  "kinds": [],
+  "circles": [
+    {
+      "x": 280,
+      "y": 500,
+      "r": 30,
+      "kind": "player",
+      "hue": 180,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1500,
+      "y": 500,
+      "r": 22,
+      "kind": "splitter",
+      "hue": 60,
+      "vx": 0,
+      "vy": 0
+    }
+  ]
+}

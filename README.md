@@ -4,7 +4,7 @@
 
 You are a single cell adrift in a lightless basin. To move, you eject mass behind you. Touching anything smaller absorbs it; touching anything larger means you are absorbed. Mass is conserved, momentum is conserved, gravity is real. The only way to grow is to eat — and eating well requires planning.
 
-The whole game is a single self-contained `index.html` file. No external assets, no build step, no dependencies. The audio is procedural (WebAudio); the visuals are 2D canvas with radial gradients for the bioluminescence.
+The dev tree is a small set of ES modules under `js/` plus level data as JSON; `npm run build` bundles everything into a single self-contained `dist/index.html` that runs from `file://` with no server. No external assets at runtime: the audio is procedural (WebAudio), the visuals are 2D canvas with radial gradients for the bioluminescence, and every level is embedded in the HTML as a `<script type="application/json">` payload.
 
 https://seewhatimade.github.io/lumenphage/
 
@@ -12,13 +12,25 @@ https://seewhatimade.github.io/lumenphage/
 
 ## Running it
 
-The Gamepad API requires a secure context, so launch a tiny local web server rather than opening the file directly:
+**Quick play (just the bundled file):**
 
 ```sh
-cd lumenphage
-python3 -m http.server 8000
+npm install        # one-time — fetches acorn + esbuild for the build step
+npm run build      # produces dist/index.html
+# open dist/index.html in any modern browser
+```
+
+The bundled HTML embeds the JS bundle and every level as inline data, so it works straight from `file://`.
+
+**Dev mode (per-file modules, fast iteration):**
+
+```sh
+npm install
+npm run serve      # python3 -m http.server on :8000
 # then open http://localhost:8000
 ```
+
+The dev server is required because ES modules + the Gamepad API both need a secure-ish context — `file://` won't work for the unbundled tree (use `npm run build` for that). Edits to `js/*.js` show up on the next reload; no rebuild needed.
 
 Any modern browser works (Chrome/Firefox/Safari/Edge). For controllers, an SNES-mapped USB or Bluetooth pad is supported out of the box. Keyboard fallback is built in for everything and is fully configurable.
 
@@ -495,11 +507,123 @@ User-authored kinds can attach any of seven procedural SFX presets (**chime, thu
 
 ```
 lumenphage/
-├── index.html       # The entire game. (Refactoring soon)
-└── README.md        # This file.
+├── index.html               # DOM + styles only — a thin shell with a single
+│                            # <script type="module" src="js/main.js">. ~600 LOC.
+├── js/                      # ES modules. Each file declares explicit imports
+│   │                        # and exports; main.js is the entry.
+│   ├── main.js              # Boot, main render/update loop, event listeners,
+│   │                        # the Campaign module, hueColor, toast, the input
+│   │                        # system, library data (RULE_LIBRARY / ABILITY_
+│   │                        # LIBRARY / BUILTIN_INSPECTION / EDITOR_KIND_DESC
+│   │                        # / kindAICost), createTagChipInput. Top-level
+│   │                        # `await LevelStore.load()` blocks the menu render
+│   │                        # until level JSON is in hand. ~2.3k LOC.
+│   ├── core.js              # TAU, mass helpers, MIN_MOTE_MASS, _ACTIVE_THRUST,
+│   │                        # KIND_META, LEVEL_TYPES, VICTORY_CONDITIONS,
+│   │                        # mulberry32. Imported by almost everything.
+│   ├── circle.js            # Circle entity class.
+│   ├── settings.js          # Persistent input/audio/visual settings + bindings.
+│   ├── touch.js             # Touch overlay + virtual stick.
+│   ├── persist.js           # Thin localStorage wrapper used by everything that
+│   │                        # persists (single warning on quota / private-mode
+│   │                        # failures, no silent try/catch).
+│   ├── audio.js             # Procedural music + SFX engine.
+│   ├── kind-builtins.js     # Built-in kind data (rules / abilities for hunter,
+│   │                        # predator, etc.).
+│   ├── kinds.js             # Kind registry: built-ins + user kinds, level-
+│   │                        # embedded overrides.
+│   ├── shape.js             # Playable-area composition (rect / circle /
+│   │                        # polygon CSG).
+│   ├── world.js             # Sim state, physics step, victory logic.
+│   ├── player.js            # Player input → thrust / boost / aim.
+│   ├── view.js              # Camera follow + zoom + intro animation.
+│   ├── seen-kinds.js        # First-encounter nameplate registry.
+│   ├── stats.js             # Per-level stats (attempts / completions / best
+│   │                        # time / peak mass).
+│   ├── debug.js             # Dev-mode toggle + debug overlay flags.
+│   ├── presets.js           # Curated custom-game configurations.
+│   ├── custom-options.js    # Custom-game form state + presets.
+│   ├── levels.js            # Procedural level builders (sparse / packed /
+│   │                        # gravity).
+│   ├── level-store.js       # Loads levels/{campaign,presets}/manifest.json +
+│   │                        # JSON files at boot. Prefers the inline <script
+│   │                        # type="application/json" id="lumenphage-levels">
+│   │                        # payload when present (production build); falls
+│   │                        # back to per-file fetches in dev.
+│   ├── color-palette.js     # 10 lumenphage-themed level palettes + user-saved
+│   │                        # palettes.
+│   ├── game.js              # Top-level state machine (menu / playing / paused
+│   │                        # / etc.). `Game.paused` is a getter derived from
+│   │                        # `Game.state` — single source of truth.
+│   ├── ui.js                # UI core: clearOverlay, renderMenu, refreshSelected,
+│   │                        # updateHUD, renderPause, _navItems, replayCurrent,
+│   │                        # menuActivate. Method groups live in ui-*.js.
+│   ├── ui-menus.js          # Campaign / preset / hint / new-kinds / design-list
+│   │                        # menus. Object.assign-extends UI.
+│   ├── ui-modals.js         # In-app prompt() / confirm() (replace native).
+│   ├── ui-settings.js       # Settings + Debug panels + form-adjust helper.
+│   ├── ui-kinds.js          # Kind library + kind editor (rules, abilities,
+│   │                        # pickups, tests, observation overlay).
+│   ├── editor.js            # Level designer core: state + dispatcher methods
+│   │                        # (open / exit / update / drawOverlay / renderBar /
+│   │                        # _matchAppliedPalette / toggleFocus). Method
+│   │                        # groups live in editor-*.js.
+│   ├── editor-history.js    # Undo / redo / snapshots.
+│   ├── editor-io.js         # Serialize / deserialize / save / load / export /
+│   │                        # import / play / replayTest / saveTestCase.
+│   ├── editor-selection.js  # Multi-select bookkeeping, alignment / distribute
+│   │                        # gestures, kind/radius/velocity inspector.
+│   ├── editor-shape.js      # Shape-tool primitives (rect / circle / polygon
+│   │                        # CSG authoring), mirror handling.
+│   ├── editor-modes.js      # Ring placement, move-to-line preview, ricochet,
+│   │                        # randomize, orbitAll.
+│   ├── editor-helpers.js    # Snap / quantize / camera / toolbar nav.
+│   ├── highlight-json.js    # JSON syntax highlighter for the level-designer
+│   │                        # JSON panel.
+│   └── json-panel.js        # Live-JSON view of the level designer.
+├── levels/                  # Level data — disk-side source of truth.
+│   ├── campaign/
+│   │   ├── manifest.json    # id / name / stage / branches / hint /
+│   │   │                    # file?|procedural?
+│   │   └── 01-first-bite.json … 30-singularity.json
+│   └── presets/
+│       ├── manifest.json
+│       └── petri-dish.json …
+├── dist/                    # Build output (gitignored).
+│   └── index.html           # Self-contained single file: minified JS bundle
+│                            # + inline level JSON. ~465 KB. Runs from file://.
+├── scripts/                 # Tooling — none of this ships with the game.
+│   ├── build.mjs            # esbuild: bundles main.js + every level JSON into
+│   │                        # dist/index.html. `npm run build`.
+│   ├── check.mjs            # `node --check` on every js/*.js as ES modules.
+│   └── extract-levels.mjs   # Stubs browser globals on globalThis, dynamic-
+│                            # imports main.js (which awaits LevelStore.load),
+│                            # then re-derives every levels/**/*.json by
+│                            # running each build() against the live runtime.
+├── test/
+│   └── levels.test.mjs      # Schema + branch + idempotency tests on the
+│                            # JSON files. `npm run test:verify` re-runs the
+│                            # extractor and diffs against on-disk JSON.
+├── package.json             # Type=module, scripts, devDeps (acorn + esbuild).
+├── package-lock.json
+├── .gitignore               # node_modules/, dist/, .DS_Store
+└── README.md
 ```
 
-To customize colors, balance, level builders, or AI, read the comments in `index.html` — labelled sections cover INPUT, AUDIO, PHYSICS, WORLD, LEVELS, CAMPAIGN, PROCEDURAL (presets + random), CUSTOM OPTIONS, STATS, SEEN KINDS, DEBUG, PLAYER, RENDERING, GAME STATE, EDITOR, KIND DESIGNER, MAIN LOOP.
+**Module style.** Every `js/*.js` is a native ES module with explicit `import`/`export`. The browser loads them via the single `<script type="module" src="js/main.js">` in `index.html`; everything else is reached through `main.js`'s import graph. The Editor / UI partials (`editor-*.js`, `ui-*.js`) import their parent god-object and `Object.assign` methods onto it at module-eval time, so dispatcher logic stays in the core file but tooling/IO/etc. live in their own files. `main.js` triggers each partial via side-effect imports.
+
+**Boot order** is now imposed by the import graph rather than `<script src>` order. `main.js` does a top-level `await LevelStore.load()` before kicking off the animation loop, so the menu renders against a populated `Campaign.levels` instead of a flash-of-empty-menu.
+
+**`npm` scripts:**
+
+| Script | What it does |
+|---|---|
+| `npm run serve` | `python3 -m http.server 8000` — dev mode against per-file modules. |
+| `npm run build` | esbuild bundle → `dist/index.html`. Single self-contained file. |
+| `npm run check` | `node --check` every module file (as ESM). Fast syntax-only pass. |
+| `npm test` | Schema / branch / shape tests on the level JSON. |
+| `npm run test:verify` | Tests + re-runs the extractor and confirms the JSON files round-trip byte-identically. |
+| `npm run extract-levels` | Regenerates `levels/**/*.json` from the live runtime — used as a verification gate before committing any code change that could affect level data. |
 
 ---
 

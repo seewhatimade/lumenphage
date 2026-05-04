@@ -1,0 +1,65 @@
+{
+  "type": "sparse",
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 1200,
+    "h": 600
+  },
+  "shape": null,
+  "insideColor": "#0a1828",
+  "outsideColor": "#040a14",
+  "edgeColor": "#8cdcff",
+  "gravityCenters": [],
+  "randomVelocity": false,
+  "victoryCondition": "absorb_all",
+  "victoryParam": 60,
+  "kinds": [],
+  "circles": [
+    {
+      "x": 167.8992705340255,
+      "y": 302.0190007259402,
+      "r": 30,
+      "kind": "anti",
+      "hue": 290,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 329.5325188903493,
+      "y": 301.90918223929236,
+      "r": 20,
+      "kind": "player",
+      "hue": 180,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 955.0839894785845,
+      "y": 295.3728770922335,
+      "r": 30,
+      "kind": "predator",
+      "hue": 350,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 329.5325188903493,
+      "y": 136.7175462098806,
+      "r": 12,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 329.5325188903493,
+      "y": 467.1008182687041,
+      "r": 12,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    }
+  ]
+}

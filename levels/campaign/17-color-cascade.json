@@ -1,0 +1,119 @@
+{
+  "type": "sparse",
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 2600,
+    "h": 700
+  },
+  "shape": null,
+  "insideColor": "#0a1828",
+  "outsideColor": "#040a14",
+  "edgeColor": "#8cdcff",
+  "gravityCenters": [],
+  "randomVelocity": false,
+  "victoryCondition": "absorb_all",
+  "victoryParam": 60,
+  "kinds": [],
+  "circles": [
+    {
+      "x": 160,
+      "y": 350,
+      "r": 13,
+      "kind": "player",
+      "hue": 180,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 360,
+      "y": 430,
+      "r": 11,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 580,
+      "y": 270,
+      "r": 12.979999999999999,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 800,
+      "y": 430,
+      "r": 15.316399999999998,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1020,
+      "y": 270,
+      "r": 18.073351999999996,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1240,
+      "y": 430,
+      "r": 21.326555359999993,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1460,
+      "y": 270,
+      "r": 25.16533532479999,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1680,
+      "y": 430,
+      "r": 29.695095683263986,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1900,
+      "y": 270,
+      "r": 35.040212906251504,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 2120,
+      "y": 430,
+      "r": 41.34745122937677,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 2340,
+      "y": 270,
+      "r": 48.78999245066459,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    }
+  ]
+}

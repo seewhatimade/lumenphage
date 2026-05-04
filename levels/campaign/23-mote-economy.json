@@ -1,0 +1,146 @@
+{
+  "type": "sparse",
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 1600,
+    "h": 1000
+  },
+  "shape": null,
+  "insideColor": "#0a1828",
+  "outsideColor": "#040a14",
+  "edgeColor": "#8cdcff",
+  "gravityCenters": [],
+  "randomVelocity": false,
+  "victoryCondition": "absorb_all",
+  "victoryParam": 60,
+  "kinds": [],
+  "circles": [
+    {
+      "x": 200,
+      "y": 500,
+      "r": 22,
+      "kind": "player",
+      "hue": 180,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 800,
+      "y": 500,
+      "r": 24,
+      "kind": "glutton",
+      "hue": 35,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 850,
+      "y": 500,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 835.3553390593274,
+      "y": 535.3553390593273,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 800,
+      "y": 550,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 764.6446609406727,
+      "y": 535.3553390593274,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 750,
+      "y": 500,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 764.6446609406726,
+      "y": 464.6446609406726,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 800,
+      "y": 450,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 835.3553390593273,
+      "y": 464.6446609406726,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 200,
+      "y": 180,
+      "r": 16,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 200,
+      "y": 820,
+      "r": 16,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1400,
+      "y": 180,
+      "r": 16,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1400,
+      "y": 820,
+      "r": 16,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    }
+  ]
+}

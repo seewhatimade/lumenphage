@@ -1,0 +1,182 @@
+{
+  "type": "sparse",
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 1900,
+    "h": 1400
+  },
+  "shape": null,
+  "insideColor": "#0a1828",
+  "outsideColor": "#040a14",
+  "edgeColor": "#8cdcff",
+  "gravityCenters": [],
+  "randomVelocity": false,
+  "victoryCondition": "absorb_all",
+  "victoryParam": 60,
+  "kinds": [],
+  "circles": [
+    {
+      "x": 420,
+      "y": 700,
+      "r": 24,
+      "kind": "player",
+      "hue": 180,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 150,
+      "y": 700,
+      "r": 30,
+      "kind": "predator",
+      "hue": 350,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 900,
+      "y": 350,
+      "r": 14,
+      "kind": "magnet",
+      "hue": 200,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 900,
+      "y": 1050,
+      "r": 14,
+      "kind": "magnet",
+      "hue": 200,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 750,
+      "y": 200,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 950,
+      "y": 200,
+      "r": 10,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1150,
+      "y": 200,
+      "r": 12,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1350,
+      "y": 200,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1550,
+      "y": 200,
+      "r": 10,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 750,
+      "y": 550,
+      "r": 12,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 950,
+      "y": 550,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1150,
+      "y": 550,
+      "r": 10,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1350,
+      "y": 550,
+      "r": 12,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1550,
+      "y": 550,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 750,
+      "y": 900,
+      "r": 10,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 950,
+      "y": 900,
+      "r": 12,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1150,
+      "y": 900,
+      "r": 8,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1350,
+      "y": 900,
+      "r": 10,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "version": 1,
+  "levels": [
+    {
+      "id": 1,
+      "name": "First Bite",
+      "stage": "Tutorial",
+      "branches": [
+        2
+      ],
+      "hint": "You are the cyan cell. Drift into the blue one to absorb it.",
+      "file": "01-first-bite.json"
+    },
+    {
+      "id": 2,
+      "name": "Reach Out",
+      "stage": "Tutorial",
+      "branches": [
+        3
+      ],
+      "hint": "Hold A (gamepad) or Space (keyboard) to thrust. You eject mass behind you to move forward.",
+      "file": "02-reach-out.json"
+    },
+    {
+      "id": 3,
+      "name": "Course Correct",
+      "stage": "Tutorial",
+      "branches": [
+        4
+      ],
+      "hint": "Hold a D-pad direction (or arrow key) to aim — your arrow swings toward that angle. Hold two adjacent directions together to lock onto a 45° diagonal: the only line that catches all three neutrals in a single thrust.",
+      "file": "03-course-correct.json"
+    },
+    {
+      "id": 4,
+      "name": "Conservation",
+      "stage": "Tutorial",
+      "branches": [
+        5
+      ],
+      "hint": "Every thrust costs you mass. Every meal restores it. Stay solvent.",
+      "file": "04-conservation.json"
+    },
+    {
+      "id": 5,
+      "name": "Ricochet",
+      "stage": "Tutorial",
+      "branches": [
+        6,
+        11
+      ],
+      "hint": "Walls bounce you back perfectly elastically. Aim up-right at 45° and boost (B on gamepad / Z on keyboard) — one big kick stays on the angular path. Sustained thrust scatters propellant motes that drift onto your line and knock you off the next intercept.",
+      "file": "05-ricochet.json"
+    },
+    {
+      "id": 6,
+      "name": "Drift",
+      "stage": "Physics",
+      "branches": [
+        7
+      ],
+      "hint": "Space, not water. Velocity persists. A small push goes a long way.",
+      "file": "06-drift.json"
+    },
+    {
+      "id": 7,
+      "name": "Recapture",
+      "stage": "Physics",
+      "branches": [
+        8
+      ],
+      "hint": "Your propellant is food. Catch the motes you ejected — and the splitter's children fly outward, so chase them too.",
+      "file": "07-recapture.json"
+    },
+    {
+      "id": 8,
+      "name": "Brake!",
+      "stage": "Physics",
+      "branches": [
+        9
+      ],
+      "hint": "Eject toward your direction of travel to slow down. Don't fly into the red.",
+      "file": "08-brake.json"
+    },
+    {
+      "id": 9,
+      "name": "First Orbit",
+      "stage": "Physics",
+      "branches": [
+        10
+      ],
+      "hint": "Mass at the center pulls you in. Move sideways fast enough — that's orbit.",
+      "file": "09-first-orbit.json"
+    },
+    {
+      "id": 10,
+      "name": "Whirlpool",
+      "stage": "Physics",
+      "branches": [
+        16
+      ],
+      "hint": "Stronger well, deeper rings. Eat outside-in. Don't fall through the floor.",
+      "procedural": {
+        "builder": "gravity",
+        "seed": 7
+      }
+    },
+    {
+      "id": 11,
+      "name": "Read the Tide",
+      "stage": "Predation",
+      "branches": [
+        12
+      ],
+      "hint": "Blue: smaller than you, safe to eat. Red: bigger, will absorb you.",
+      "file": "11-read-the-tide.json"
+    },
+    {
+      "id": 12,
+      "name": "First Hunter",
+      "stage": "Predation",
+      "branches": [
+        13
+      ],
+      "hint": "Hunters chase smaller cells. You're bigger here — let it come to you.",
+      "file": "12-first-hunter.json"
+    },
+    {
+      "id": 13,
+      "name": "The Avoider",
+      "stage": "Predation",
+      "branches": [
+        14
+      ],
+      "hint": "Avoiders flee from anything bigger — including the larger neutrals on the field. Use them like walls to cut the avoider's escape angle.",
+      "file": "13-the-avoider.json"
+    },
+    {
+      "id": 14,
+      "name": "Pack",
+      "stage": "Predation",
+      "branches": [
+        15
+      ],
+      "hint": "Five hunters of mismatched size. Each is individually weak — but the bigger ones already see the smaller ones as prey, so the cascade starts on its own. Pick them off before any one consolidates into something bigger than you.",
+      "file": "14-pack.json"
+    },
+    {
+      "id": 15,
+      "name": "Apex",
+      "stage": "Predation",
+      "branches": [
+        16
+      ],
+      "hint": "The giant is too big to fight. Dodge, gather a few neutrals to grow, and wait while it thrusts itself thin chasing you. When its mass drops below yours, turn around.",
+      "file": "15-apex.json"
+    },
+    {
+      "id": 16,
+      "name": "Standoff Field",
+      "stage": "Convergence",
+      "branches": [
+        17
+      ],
+      "hint": "Cells within 5% of your mass won't absorb either way. Grow first.",
+      "file": "16-standoff-field.json"
+    },
+    {
+      "id": 17,
+      "name": "Color Cascade",
+      "stage": "Convergence",
+      "branches": [
+        18
+      ],
+      "hint": "Each cell is just barely bigger than the last. Eat in order.",
+      "file": "17-color-cascade.json"
+    },
+    {
+      "id": 18,
+      "name": "The Lure",
+      "stage": "Convergence",
+      "branches": [
+        19
+      ],
+      "hint": "The hunter wants the avoider. Drive them together. Anti-motes will erase any propellant you eject through them.",
+      "file": "18-the-lure.json"
+    },
+    {
+      "id": 19,
+      "name": "Slingshot",
+      "stage": "Convergence",
+      "branches": [
+        20
+      ],
+      "hint": "Drop into orbit, swing past the well, and let it fling you outward.",
+      "file": "19-slingshot.json"
+    },
+    {
+      "id": 20,
+      "name": "The Wall",
+      "stage": "Convergence",
+      "branches": [
+        21,
+        26
+      ],
+      "hint": "Packed cells, bigger threats mixed in. Stay alive for 2 minutes — eat the small ones to grow, dodge the rest.",
+      "procedural": {
+        "builder": "packed",
+        "seed": 20
+      },
+      "victoryOverride": {
+        "condition": "survive",
+        "param": 120
+      }
+    },
+    {
+      "id": 21,
+      "name": "Mass Thief",
+      "stage": "Strategy",
+      "branches": [
+        22
+      ],
+      "hint": "A predator stalks you from behind, eating every mote you eject. Magnets in the field will pull your propellant astray.",
+      "file": "21-mass-thief.json"
+    },
+    {
+      "id": 22,
+      "name": "Patience",
+      "stage": "Strategy",
+      "branches": [
+        23
+      ],
+      "hint": "Two predators want each other. Don't engage. The winner will be hard, but tired.",
+      "file": "22-patience.json"
+    },
+    {
+      "id": 23,
+      "name": "Mote Economy",
+      "stage": "Strategy",
+      "branches": [
+        24
+      ],
+      "hint": "The glutton drains anything smaller in its halo. Stay outside, eat the fat neutrals around the perimeter to grow, then close in once you outmass it.",
+      "file": "23-mote-economy.json"
+    },
+    {
+      "id": 24,
+      "name": "Predator's Predator",
+      "stage": "Strategy",
+      "branches": [
+        25
+      ],
+      "hint": "The predator outmasses you. Stand your ground, let it charge, then dodge perpendicular at the last moment — its momentum carries it past you and into the anti-mote you've been standing in front of.",
+      "file": "24-predator-s-predator.json"
+    },
+    {
+      "id": 25,
+      "name": "The Garden",
+      "stage": "Strategy",
+      "branches": [
+        30
+      ],
+      "hint": "Everything you've learned, plus a few new wildflowers: splitters, magnets, repellers, and a pulsar.",
+      "file": "25-the-garden.json"
+    },
+    {
+      "id": 26,
+      "name": "Twin Rings",
+      "stage": "Endurance",
+      "branches": [
+        27
+      ],
+      "hint": "Two orbits, opposite rotations. A singularity-child rides one of them — its tiny well disturbs everything nearby.",
+      "file": "26-twin-rings.json"
+    },
+    {
+      "id": 27,
+      "name": "Pressure",
+      "stage": "Endurance",
+      "branches": [
+        28
+      ],
+      "hint": "Predators in the outer ring, hungry pups in the middle. Eat fast. Stay moving.",
+      "file": "27-pressure.json"
+    },
+    {
+      "id": 28,
+      "name": "Black Tide",
+      "stage": "Endurance",
+      "branches": [
+        29
+      ],
+      "hint": "Strong gravity. A predator ring blocks the bottom. The pulsar at the center kicks orbits askew on every beat.",
+      "file": "28-black-tide.json"
+    },
+    {
+      "id": 29,
+      "name": "Genesis",
+      "stage": "Endurance",
+      "branches": [
+        30
+      ],
+      "hint": "A complete ecosystem — every kind you've met, all at once. Read the field, then fight for the throne.",
+      "file": "29-genesis.json"
+    },
+    {
+      "id": 30,
+      "name": "Singularity",
+      "stage": "Endurance",
+      "branches": [],
+      "hint": "Strong well. An apex hunter on your ring. Both physics and predation, at once.",
+      "file": "30-singularity.json"
+    }
+  ]
+}

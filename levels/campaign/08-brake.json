@@ -1,0 +1,92 @@
+{
+  "type": "sparse",
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 2200,
+    "h": 800
+  },
+  "shape": null,
+  "insideColor": "#0a1828",
+  "outsideColor": "#040a14",
+  "edgeColor": "#8cdcff",
+  "gravityCenters": [],
+  "randomVelocity": false,
+  "victoryCondition": "absorb_all",
+  "victoryParam": 60,
+  "kinds": [],
+  "circles": [
+    {
+      "x": 220,
+      "y": 400,
+      "r": 22,
+      "kind": "player",
+      "hue": 180,
+      "vx": 240,
+      "vy": 0
+    },
+    {
+      "x": 1900,
+      "y": 400,
+      "r": 52,
+      "kind": "neutral",
+      "hue": 0,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 400,
+      "y": 200,
+      "r": 14,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 580,
+      "y": 600,
+      "r": 14,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 760,
+      "y": 200,
+      "r": 22,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 940,
+      "y": 600,
+      "r": 22,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1120,
+      "y": 200,
+      "r": 28,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    },
+    {
+      "x": 1300,
+      "y": 600,
+      "r": 28,
+      "kind": "neutral",
+      "hue": 220,
+      "vx": 0,
+      "vy": 0
+    }
+  ]
+}

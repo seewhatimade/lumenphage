@@ -1,0 +1,19 @@
+{
+  "name": "lumenphage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A bioluminescent drift in dark water — eat what is smaller than you. Single-file canvas game.",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "check": "node scripts/check.mjs",
+    "extract-levels": "node scripts/extract-levels.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test 'test/*.test.mjs'",
+    "test:verify": "SNAPSHOT_VERIFY=1 node --test --test-concurrency=1 'test/*.test.mjs'"
+  },
+  "devDependencies": {
+    "acorn": "^8.16.0",
+    "esbuild": "^0.28.0"
+  }
+}
