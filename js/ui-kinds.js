@@ -660,8 +660,8 @@ Object.assign(UI, {
                   <option value="drift"  ${initPreset==="drift" ?"selected":""}>Drift — passive, no AI</option>
                   <option value="hunt"   ${initPreset==="hunt"  ?"selected":""}>Hunt — chase smaller circles</option>
                   <option value="flee"   ${initPreset==="flee"  ?"selected":""}>Flee — avoid larger circles</option>
-                  <option value="custom" ${initPreset==="custom"?"selected":""}>Custom rules…</option>
                   <option value="field"  ${initPreset==="field" ?"selected":""}>Field — carries a gravity well</option>
+                  <option value="custom" ${initPreset==="custom"?"selected":""}>Custom rules…</option>
                 </select>
                 <span id="ke-preset-desc" style="opacity:0.55; font-size:10px; margin-left:8px;"></span>
               </td></tr>
