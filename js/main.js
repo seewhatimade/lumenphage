@@ -31,6 +31,7 @@ import "./ui-menus.js";
 import "./ui-modals.js";
 import "./ui-settings.js";
 import "./ui-kinds.js";
+import "./ui-level-settings.js";
 
 // ============================================================
 //   LUMENPHAGE — bioluminescent drift

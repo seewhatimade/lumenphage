@@ -87,7 +87,7 @@ export const Editor = {
     this.testCaseMode = null;
     World.reset();
     World.type = LEVEL_TYPES.SPARSE;
-    World.bounds = { x: 0, y: 0, w: 2200, h: 1500 };
+    World.bounds = { x: 0, y: 0, w: 2176, h: 1472 };
     // Camera centered
     World.cameraX = World.bounds.w / 2;
     World.cameraY = World.bounds.h / 2;
@@ -127,7 +127,7 @@ export const Editor = {
     // still one dropdown click away.
     this.selectedKind = kindId;
     // Layout-shaped data round-trips through deserialize.
-    this.deserialize(test.layout || { type: "sparse", bounds: { x:0, y:0, w:1200, h:800 }, circles: [] });
+    this.deserialize(test.layout || { type: "sparse", bounds: { x:0, y:0, w:1216, h:832 }, circles: [] });
     World.cameraX = World.bounds.w / 2;
     World.cameraY = World.bounds.h / 2;
     World.cameraScale = Math.min(W / World.bounds.w, H / World.bounds.h) * 0.85;
@@ -164,188 +164,166 @@ export const Editor = {
     const focusId = this.focus === "toolbar" && document.activeElement &&
                     editorBar.contains(document.activeElement)
                       ? document.activeElement.id : null;
-    const isPacked = this.selectedType === LEVEL_TYPES.PACKED;
-    const hasWells = World.gravityCenters.length > 0;
-    const isSurvive = this.victoryCondition === VICTORY_CONDITIONS.SURVIVE;
+    // Place size only matters for tools that change circle radius:
+    //   Place — sets the radius of newly placed circles
+    //   Select — wheel grows / shrinks every selected circle
+    // Velocity / Shape don't read it, so the slider is hidden in those.
+    const showSize = this.tool === "place" || this.tool === "select";
+    // Row 2 hosts the shape primitive controls (Tool=Shape) OR the
+    // selection inspector + alignment (when ≥1 circle is selected).
+    // The two are mutually exclusive in practice — switching to Shape
+    // clears the selection — so we pick one based on the current tool.
+    const showShapeRow  = this.tool === "shape";
+    const showSelRow    = !showShapeRow && this.selection.size > 0;
+    // Wells cluster (Ring around well + Orbit pair) appears whenever the
+    // level has ≥1 gravity well, regardless of selection — Orbit operates
+    // on the selection if any, else on every non-player circle.
+    const showWellsRow  = !showShapeRow && World.gravityCenters.length > 0;
+    const showRing      = !!this._ring;
+    const row2Visible   = showShapeRow || showSelRow || showWellsRow || showRing;
+    const escTest = (this.testCaseMode && this.testCaseMode.name || "")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;");
+    const jsonLabel = JsonPanel.visible ? "Hide JSON" : "Show JSON";
     editorBar.innerHTML = `
-      <label>Type
-        <select id="ed-type">
-          <option value="sparse">Sparse box</option>
-          <option value="packed">Packed box</option>
-          <option value="gravity">Gravity well</option>
-        </select>
-      </label>
-      ${isPacked ? `<button id="ed-randomize">Randomize placement</button>` : ""}
-      <label title="World width (px) — clamped to [400, 12000]">w <input id="ed-bw" type="number" min="400" max="12000" value="${World.bounds.w}" style="width:72px;"></label>
-      <label title="World height (px) — clamped to [400, 12000]">h <input id="ed-bh" type="number" min="400" max="12000" value="${World.bounds.h}" style="width:72px;"></label>
-      <label title="Fill color of the playable area">in <input id="ed-color-in" type="color" value="${World.insideColor}" style="width:32px; height:22px; padding:0; border:none; background:transparent;"></label>
-      <label title="Fill color outside the playable area">out <input id="ed-color-out" type="color" value="${World.outsideColor}" style="width:32px; height:22px; padding:0; border:none; background:transparent;"></label>
-      <label title="Color of the playable-area boundary">edge <input id="ed-color-edge" type="color" value="${World.edgeColor}" style="width:32px; height:22px; padding:0; border:none; background:transparent;"></label>
-      ${(() => {
-        const userPalettes = ColorPalette.loadUser();
-        const sel = this._appliedPalette || "";
-        const escAttr = s => String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
-        const escTxt  = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-        const opts = (group, list, prefix) => list.length
-          ? `<optgroup label="${group}">${list.map(p => {
-              const v = `${prefix}:${p.name}`;
-              return `<option value="${escAttr(v)}"${v === sel ? " selected" : ""}>${escTxt(p.name)}</option>`;
-            }).join("")}</optgroup>` : "";
-        const isUserSel = sel.startsWith("user:");
-        return `<label title="Apply a saved color palette">Theme
-          <select id="ed-color-preset">
-            <option value="" ${sel ? "" : "selected"}>—</option>
-            ${opts("Built-in", ColorPalette.BUILTINS, "builtin")}
-            ${opts("Saved", userPalettes, "user")}
+      <div class="ed-bar-row-1">
+        <label>Tool
+          <select id="ed-tool">
+            <option value="place"    ${this.tool==="place"   ?"selected":""}>Place</option>
+            <option value="select"   ${this.tool==="select"  ?"selected":""}>Select</option>
+            <option value="velocity" ${this.tool==="velocity"?"selected":""}>Velocity</option>
+            <option value="shape"    ${this.tool==="shape"   ?"selected":""}>Shape</option>
           </select>
         </label>
-        <button id="ed-color-save" title="Save the current in/out/edge colors as a named palette">Save palette…</button>
-        <button id="ed-color-del" title="Delete the currently-selected saved palette" ${isUserSel ? "" : "disabled"}>Delete</button>`;
-      })()}
-      <label>Place size
-        <input id="ed-size" type="range" min="6" max="120" value="${this.selectedSize}">
-        <span id="ed-size-v">${this.selectedSize}</span>
-      </label>
-      <label>Kind
-        <select id="ed-kind">
-          ${Object.entries(KIND_META).map(([k, m]) =>
-            `<option value="${k}">${m.label}</option>`).join("")}
-          <option value="player">Player (only one)</option>
-          <option value="well">Gravity well</option>
-          ${Campaign.devModeEnabled()
-            ? `<option value="__kut__">Kind under test (preview placeholder)</option>` : ""}
-        </select>
-        <span id="ed-kind-desc" style="opacity:0.65; font-size:11px; max-width:340px; display:inline-block; margin-left:4px;"></span>
-      </label>
-      <label>Tool
-        <select id="ed-tool">
-          <option value="place"    ${this.tool==="place"   ?"selected":""}>Place</option>
-          <option value="select"   ${this.tool==="select"  ?"selected":""}>Select</option>
-          <option value="velocity" ${this.tool==="velocity"?"selected":""}>Velocity</option>
-          <option value="shape"    ${this.tool==="shape"   ?"selected":""}>Shape</option>
-        </select>
-      </label>
-      ${this.tool === "shape" ? `<span style="display:inline-flex; gap:6px; align-items:center;">
-        <label title="Primitive type. Rect/Circle: drag. Polygon: click to add vertices, right-click to finish.">Primitive
-          <select id="ed-shape-type">
-            <option value="rect"    ${this._shapeAddType==="rect"   ?"selected":""}>Rect</option>
-            <option value="circle"  ${this._shapeAddType==="circle" ?"selected":""}>Circle</option>
-            <option value="polygon" ${this._shapeAddType==="polygon"?"selected":""}>Polygon</option>
+        <label>Kind
+          <select id="ed-kind">
+            ${Object.entries(KIND_META).map(([k, m]) =>
+              `<option value="${k}">${m.label}</option>`).join("")}
+            <option value="player">Player (only one)</option>
+            <option value="well">Gravity well</option>
+            ${Campaign.devModeEnabled()
+              ? `<option value="__kut__">Kind under test (preview placeholder)</option>` : ""}
           </select>
         </label>
-        <label title="Add to playable area or carve a hole">Sign
-          <select id="ed-shape-sign">
-            <option value="+" ${this._shapeAddSign==="+"?"selected":""}>+ add</option>
-            <option value="-" ${this._shapeAddSign==="-"?"selected":""}>− carve</option>
+        <span class="ed-info-icon" id="ed-kind-info" title="">ⓘ</span>
+        ${showSize ? `<label>Size
+          <input id="ed-size" type="range" min="6" max="120" value="${this.selectedSize}">
+          <span id="ed-size-v">${this.selectedSize}</span>
+        </label>` : ""}
+        <label>Mirror
+          <select id="ed-mirror">
+            <option value="none"       ${this.mirror==="none"      ?"selected":""}>off</option>
+            <option value="horizontal" ${this.mirror==="horizontal"?"selected":""}>horizontal</option>
+            <option value="vertical"   ${this.mirror==="vertical"  ?"selected":""}>vertical</option>
+            <option value="both"       ${this.mirror==="both"      ?"selected":""}>both</option>
           </select>
         </label>
-        <button id="ed-shape-reset" title="Reset shape to a single + rect matching bounds">Reset</button>
-      </span>` : ""}
-      <label>Mirror
-        <select id="ed-mirror">
-          <option value="none"       ${this.mirror==="none"      ?"selected":""}>off</option>
-          <option value="horizontal" ${this.mirror==="horizontal"?"selected":""}>horizontal</option>
-          <option value="vertical"   ${this.mirror==="vertical"  ?"selected":""}>vertical</option>
-          <option value="both"       ${this.mirror==="both"      ?"selected":""}>both</option>
-        </select>
-      </label>
-      <label>Snap
-        <select id="ed-snap">
-          <option value="0"  ${this.snap===0 ?"selected":""}>off</option>
-          <option value="8"  ${this.snap===8 ?"selected":""}>8</option>
-          <option value="16" ${this.snap===16?"selected":""}>16</option>
-          <option value="32" ${this.snap===32?"selected":""}>32</option>
-          <option value="64" ${this.snap===64?"selected":""}>64</option>
-        </select>
-      </label>
-      <label title="Give every non-player circle a small random velocity at start">
-        <input id="ed-velocity" type="checkbox" ${this.randomVelocity ? "checked" : ""}>
-        Random drift
-      </label>
-      ${hasWells ? `<button id="ed-orbit" title="Set tangential velocity around the nearest gravity well — applies to selection if any, else all non-player circles">${this.selection.size > 0 ? "Orbit selection" : "Orbit all"}</button>
-      <button id="ed-orbit-reverse" title="Same as Orbit, counter-rotating">${this.selection.size > 0 ? "Reverse-orbit selection" : "Reverse orbit"}</button>` : ""}
-      ${this._ring
-        ? `<button id="ed-ring-even" title="Toggle even angular spacing (shortcut: E)">Spacing: ${this._ring.evenSpacing ? "even" : "preserve"}</button>`
-        : ""}
-      ${this.selection.size > 0 ? `<label title="Change kind on every selected circle">kind
-        <select id="ed-skind">
-          <option value="">—</option>
-          ${Object.entries(KIND_META).filter(([k]) => k !== "mote")
-            .map(([k, m]) => `<option value="${k}">${m.label}</option>`).join("")}
-          ${Campaign.devModeEnabled()
-            ? `<option value="__kut__">Kind under test (preview placeholder)</option>` : ""}
-        </select>
-      </label>
-      <label title="Radius (px) for selected circles. Empty = mixed values.">r <input id="ed-sr" type="number" min="6" max="120" step="1" style="width:60px;"></label>
-      <label title="X velocity (px/s) for selected circles. Empty = mixed values.">vx <input id="ed-vx" type="number" step="10" style="width:64px;"></label>
-      <label title="Y velocity (px/s) for selected circles. Empty = mixed values.">vy <input id="ed-vy" type="number" step="10" style="width:64px;"></label>
-      <button id="ed-vclear" title="Set velocity to 0 on every selected circle">Clear v</button>` : ""}
-      ${this.selection.size >= 2 ? `<span style="display:inline-flex; gap:2px; margin-left:4px;">
-        <button id="ed-align-l"  title="Align left edges to leftmost">⇤</button>
-        <button id="ed-align-r"  title="Align right edges to rightmost">⇥</button>
-        <button id="ed-align-t"  title="Align top edges to topmost">⤒</button>
-        <button id="ed-align-b"  title="Align bottom edges to bottommost">⤓</button>
-        <button id="ed-align-vm" title="Align vertical middle (same Y)">↕</button>
-        <button id="ed-align-hm" title="Align horizontal middle (same X)">↔</button>
-        <button id="ed-dist-v" ${this.selection.size < 3 ? "disabled" : ""} title="Distribute equally along the vertical axis (equal Y gaps; needs ≥ 3)">≡</button>
-        <button id="ed-dist-h" ${this.selection.size < 3 ? "disabled" : ""} title="Distribute equally along the horizontal axis (equal X gaps; needs ≥ 3)">⦀</button>
-        <button id="ed-align-line" title="Move to line: click and drag to draw a line; selected circles snap to the nearest point on it. Hold Shift to constrain the line to 0° / 45° / 90°.">⟋</button>
-      </span>` : ""}
-      ${this.selection.size > 0 && World.gravityCenters.length > 0 && !this._ring
-        ? `<button id="ed-ring" title="Reposition selected motes onto a circle around the nearest well; scroll/L+R to adjust radius before committing">Ring around well</button>`
-        : ""}
-      <label>Victory
-        <select id="ed-victory">
-          <option value="absorb_all">Absorb all</option>
-          <option value="become_largest">Become largest</option>
-          <option value="survive">Survive…</option>
-          <option value="pacify">Pacify minds</option>
-        </select>
-      </label>
-      ${isSurvive ? `<label>Time
-        <input id="ed-victory-param" type="number" min="5" max="600" value="${this.victoryParam}" style="width:60px;">s
-      </label>` : ""}
-      <button id="ed-clear">Clear</button>
-      <button id="ed-json-toggle" title="Show/hide a live JSON view of the level">${JsonPanel.visible ? "Hide JSON" : "Show JSON"}</button>
-      ${this.testCaseMode ? `
-        <span style="opacity:0.7; margin-left:6px; padding:2px 8px;
-          border:1px solid rgba(120,200,255,0.3); border-radius:4px;
-          background:rgba(40,80,120,0.4);">
-          TEST: ${(this.testCaseMode.name || "").replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+        <label>Snap
+          <select id="ed-snap">
+            <option value="0"  ${this.snap===0 ?"selected":""}>off</option>
+            <option value="8"  ${this.snap===8 ?"selected":""}>8</option>
+            <option value="16" ${this.snap===16?"selected":""}>16</option>
+            <option value="32" ${this.snap===32?"selected":""}>32</option>
+            <option value="64" ${this.snap===64?"selected":""}>64</option>
+          </select>
+        </label>
+        <span class="ed-right-cluster">
+          <button id="ed-level-settings" title="Level settings — type, bounds, colors, victory, drift, wells">⚙ Level…</button>
+          ${this.testCaseMode ? `
+            <span class="ed-test-chip">TEST: ${escTest}</span>
+            <button id="ed-clear" title="Remove every circle and gravity well from the level">Clear</button>
+            <button id="ed-json-toggle" title="Show/hide a live JSON view of the level">${jsonLabel}</button>
+            <button id="ed-test-save">Save test</button>
+            <button id="ed-test-run">Run</button>
+            <button id="ed-test-done">Done</button>
+          ` : `
+            <span class="ed-file-wrap">
+              <button id="ed-file-toggle" title="File menu — save / load / export / import / clear / JSON / back to menu">File ▾</button>
+              <div id="ed-file-menu" class="ed-file-menu hidden">
+                <div class="item" id="ed-save">Save</div>
+                <div class="item" id="ed-load">Load</div>
+                <div class="item" id="ed-export">Export</div>
+                <div class="item" id="ed-import">Import</div>
+                <div class="sep"></div>
+                <div class="item" id="ed-clear">Clear</div>
+                <div class="item" id="ed-json-toggle">${jsonLabel}</div>
+                <div class="sep"></div>
+                <div class="item" id="ed-back">Back to menu</div>
+              </div>
+            </span>
+            <button id="ed-play" class="ed-play">▶ Play</button>
+          `}
         </span>
-        <button id="ed-test-save">Save test</button>
-        <button id="ed-test-run">Run</button>
-        <button id="ed-test-done">Done</button>
-      ` : `
-        <button id="ed-save">Save</button>
-        <button id="ed-load">Load</button>
-        <button id="ed-export">Export</button>
-        <button id="ed-import">Import</button>
-        <button id="ed-play">Play</button>
-        <button id="ed-back">Menu</button>
-      `}
-      <span style="opacity:0.7; margin-left:auto;">Click: place &middot; Middle: replace &middot; Right: erase &middot; Scroll: size</span>
+      </div>
+      ${row2Visible ? `<div class="ed-bar-row-2">
+        ${showShapeRow ? `
+          <label title="Primitive type. Rect / Circle: drag corner-to-corner. Polygon: click to add vertices, right-click to finish.">Primitive
+            <select id="ed-shape-type">
+              <option value="rect"    ${this._shapeAddType==="rect"   ?"selected":""}>Rect</option>
+              <option value="circle"  ${this._shapeAddType==="circle" ?"selected":""}>Circle</option>
+              <option value="polygon" ${this._shapeAddType==="polygon"?"selected":""}>Polygon</option>
+            </select>
+          </label>
+          <label title="Add to playable area or carve a hole">Sign
+            <select id="ed-shape-sign">
+              <option value="+" ${this._shapeAddSign==="+"?"selected":""}>+ add</option>
+              <option value="-" ${this._shapeAddSign==="-"?"selected":""}>− carve</option>
+            </select>
+          </label>
+          <button id="ed-shape-reset" title="Reset shape to a single + rect matching bounds">Reset</button>
+        ` : ""}
+        ${showSelRow ? `
+          <span class="ed-sel-chip">Selection · ${this.selection.size}</span>
+          <label title="Change kind on every selected circle">kind
+            <select id="ed-skind">
+              <option value="">—</option>
+              ${Object.entries(KIND_META).filter(([k]) => k !== "mote")
+                .map(([k, m]) => `<option value="${k}">${m.label}</option>`).join("")}
+              ${Campaign.devModeEnabled()
+                ? `<option value="__kut__">Kind under test (preview placeholder)</option>` : ""}
+            </select>
+          </label>
+          <label title="Radius (px) for selected circles. Empty = mixed values.">r <input id="ed-sr" type="number" min="6" max="120" step="1" style="width:60px;"></label>
+          <label title="X velocity (px/s) for selected circles. Empty = mixed values.">vx <input id="ed-vx" type="number" step="10" style="width:64px;"></label>
+          <label title="Y velocity (px/s) for selected circles. Empty = mixed values.">vy <input id="ed-vy" type="number" step="10" style="width:64px;"></label>
+          <button id="ed-vclear" title="Set velocity to 0 on every selected circle">Clear v</button>
+          ${this.selection.size >= 2 ? `<span class="ed-divider"></span>
+            <button id="ed-align-l"  title="Align left edges to leftmost">⇤</button>
+            <button id="ed-align-r"  title="Align right edges to rightmost">⇥</button>
+            <button id="ed-align-t"  title="Align top edges to topmost">⤒</button>
+            <button id="ed-align-b"  title="Align bottom edges to bottommost">⤓</button>
+            <button id="ed-align-vm" title="Align vertical middle (same Y)">↕</button>
+            <button id="ed-align-hm" title="Align horizontal middle (same X)">↔</button>
+            <button id="ed-dist-v" ${this.selection.size < 3 ? "disabled" : ""} title="Distribute equally along the vertical axis (equal Y gaps; needs ≥ 3)">≡</button>
+            <button id="ed-dist-h" ${this.selection.size < 3 ? "disabled" : ""} title="Distribute equally along the horizontal axis (equal X gaps; needs ≥ 3)">⦀</button>
+            <button id="ed-align-line" title="Move to line: click and drag to draw a line; selected circles snap to the nearest point on it. Hold Shift to constrain the line to 0° / 45° / 90°.">⟋</button>
+          ` : ""}
+        ` : ""}
+        ${showWellsRow ? `
+          ${showSelRow ? `<span class="ed-divider"></span>` : ""}
+          ${showSelRow && !this._ring ? `<button id="ed-ring" title="Reposition selected motes onto a circle around the nearest well; scroll/L+R to adjust radius before committing">Ring around well</button>` : ""}
+          <button id="ed-orbit" title="Set tangential velocity around the nearest gravity well — applies to selection if any, else all non-player circles">${this.selection.size > 0 ? "Orbit selection" : "Orbit all"}</button>
+          <button id="ed-orbit-reverse" title="Same as Orbit, counter-rotating">${this.selection.size > 0 ? "Reverse-orbit selection" : "Reverse orbit"}</button>
+        ` : ""}
+        ${showRing
+          ? `<button id="ed-ring-even" title="Toggle even angular spacing (shortcut: E)">Spacing: ${this._ring.evenSpacing ? "even" : "preserve"}</button>`
+          : ""}
+      </div>` : ""}
     `;
     const $ = id => document.getElementById(id);
-    $("ed-type").value = this.selectedType;
-    $("ed-type").onchange = e => {
-      this.selectedType = e.target.value;
-      World.type = e.target.value;
-      if (e.target.value === LEVEL_TYPES.GRAVITY && World.gravityCenters.length === 0) {
-        // Convenience: pre-place a center well so the level isn't empty.
-        World.gravityCenters = [{ x: World.bounds.w/2, y: World.bounds.h/2, strength: 2_000_000 }];
-      }
-      this.renderBar();   // re-render so the Randomize button shows/hides
-    };
-    $("ed-size").oninput = e => {
-      this.selectedSize = +e.target.value;
-      $("ed-size-v").textContent = this.selectedSize;
-    };
+    if ($("ed-size")) {
+      $("ed-size").oninput = e => {
+        this.selectedSize = +e.target.value;
+        $("ed-size-v").textContent = this.selectedSize;
+      };
+    }
     $("ed-kind").value = this.selectedKind;
+    // Kind description used to live inline next to the dropdown; now it's
+    // surfaced as a tooltip on the small ⓘ icon to keep the bar slim.
     const updateKindDesc = () => {
       const k = this.selectedKind;
       const desc = (KIND_META[k] && KIND_META[k].desc) || EDITOR_KIND_DESC[k] || "";
-      $("ed-kind-desc").textContent = desc;
+      const info = $("ed-kind-info");
+      if (info) info.title = desc;
     };
     $("ed-kind").onchange = e => {
       this.selectedKind = e.target.value;
@@ -361,15 +339,6 @@ export const Editor = {
       }
     };
     updateKindDesc();
-    $("ed-velocity").onchange = e => this.randomVelocity = e.target.checked;
-    $("ed-victory").value = this.victoryCondition;
-    $("ed-victory").onchange = e => {
-      this.victoryCondition = e.target.value;
-      this.renderBar();
-    };
-    if ($("ed-victory-param")) {
-      $("ed-victory-param").oninput = e => this.victoryParam = Math.max(5, +e.target.value || 60);
-    }
     $("ed-tool").onchange   = e => {
       this.tool = e.target.value;
       this.selection.clear();
@@ -405,9 +374,6 @@ export const Editor = {
       this._quantizeBoundsToSnap();
       this.renderBar();
     };
-    if ($("ed-randomize")) $("ed-randomize").onclick = () => this.randomize();
-    if ($("ed-orbit"))         $("ed-orbit").onclick         = () => this.orbitAll(false);
-    if ($("ed-orbit-reverse")) $("ed-orbit-reverse").onclick = () => this.orbitAll(true);
     const wireV = (id, prop) => {
       const el = $(id);
       if (!el) return;
@@ -478,130 +444,8 @@ export const Editor = {
       };
     }
     if ($("ed-ring")) $("ed-ring").onclick = () => this.enterRing();
-    const wireBound = (id, prop) => {
-      const el = $(id);
-      if (!el) return;
-      el.onchange = e => {
-        let v = Math.max(400, Math.min(12000, +e.target.value || 400));
-        // Keep bounds aligned to the active snap so both edges stay on
-        // the grid; the input visibly clamps to the nearest multiple.
-        if (this.snap) v = Math.max(this.snap, Math.round(v / this.snap) * this.snap);
-        if (v === World.bounds[prop]) { e.target.value = v; return; }
-        this.pushHistory();
-        // When an explicit shape is set, the w/h fields edit the first
-        // "+" rect primitive instead of detaching bounds from shape. The
-        // bounds AABB is then re-derived. (When shape is null we fall
-        // through to the legacy bounds-only behaviour.)
-        if (Array.isArray(World.shape) && World.shape.length) {
-          const idx = World.shape.findIndex(p => p.type === "rect" && p.sign === "+");
-          if (idx >= 0) {
-            World.shape[idx][prop] = v;
-            Shape.invalidate(World.shape);
-            this._syncBoundsToShape();
-          } else {
-            World.bounds[prop] = v;
-          }
-        } else {
-          World.bounds[prop] = v;
-        }
-        this.dirty = true;
-        e.target.value = World.bounds[prop];
-      };
-    };
-    wireBound("ed-bw", "w");
-    wireBound("ed-bh", "h");
-    // Manual color edit detaches from any applied palette so the Theme
-    // dropdown stops claiming we match it. Avoid renderBar in oninput —
-    // it would trash the native color picker mid-drag.
-    const detachPalette = () => {
-      if (this._appliedPalette) {
-        this._appliedPalette = null;
-        const sel = $("ed-color-preset");
-        if (sel) sel.value = "";
-        const del = $("ed-color-del");
-        if (del) del.disabled = true;
-      }
-    };
-    if ($("ed-color-in")) $("ed-color-in").oninput = e => {
-      World.insideColor = e.target.value; this.dirty = true; detachPalette();
-    };
-    if ($("ed-color-out")) $("ed-color-out").oninput = e => {
-      World.outsideColor = e.target.value; this.dirty = true; detachPalette();
-    };
-    if ($("ed-color-edge")) $("ed-color-edge").oninput = e => {
-      World.edgeColor = e.target.value; this.dirty = true; detachPalette();
-    };
-    if ($("ed-color-preset")) $("ed-color-preset").onchange = e => {
-      const v = e.target.value;
-      if (!v) { this._appliedPalette = null; this.renderBar(); return; }
-      const i = v.indexOf(":");
-      const src = v.slice(0, i), name = v.slice(i + 1);
-      const list = src === "builtin" ? ColorPalette.BUILTINS : ColorPalette.loadUser();
-      const pal = list.find(p => p.name === name);
-      if (!pal) { e.target.value = ""; return; }
-      ColorPalette.apply(pal);
-      this._appliedPalette = v;
-      this.dirty = true;
-      this.renderBar();
-    };
-    if ($("ed-color-save")) $("ed-color-save").onclick = () => {
-      const suggest = this._appliedPalette && this._appliedPalette.startsWith("user:")
-        ? this._appliedPalette.slice(5) : "";
-      UI.prompt({
-        title: "SAVE PALETTE",
-        message: "Name this palette:",
-        defaultValue: suggest,
-        yesLabel: "Save",
-        onYes: (rawName) => {
-          const name = (rawName || "").trim();
-          if (!name) return;
-          if (ColorPalette.isBuiltin(name)) {
-            toast(`"${name}" is a built-in name`);
-            return;
-          }
-          const arr = ColorPalette.loadUser();
-          const idx = arr.findIndex(p => p.name === name);
-          const entry = {
-            name,
-            inside:  World.insideColor,
-            outside: World.outsideColor,
-            edge:    World.edgeColor,
-          };
-          const write = () => {
-            if (idx >= 0) arr[idx] = entry; else arr.push(entry);
-            ColorPalette.saveUser(arr);
-            this._appliedPalette = `user:${name}`;
-            this.renderBar();
-            toast(`Saved palette "${name}"`);
-          };
-          if (idx >= 0) {
-            UI.confirm({
-              title: "OVERWRITE PALETTE",
-              message: `A palette named "${name}" already exists. Overwrite it?`,
-              yesLabel: "Overwrite", danger: true,
-              onYes: write,
-            });
-          } else write();
-        }
-      });
-    };
-    if ($("ed-color-del")) $("ed-color-del").onclick = () => {
-      const sel = this._appliedPalette;
-      if (!sel || !sel.startsWith("user:")) return;
-      const name = sel.slice(5);
-      UI.confirm({
-        title: "DELETE PALETTE",
-        message: `Permanently delete saved palette "${name}"?`,
-        yesLabel: "Delete", danger: true,
-        onYes: () => {
-          const arr = ColorPalette.loadUser().filter(p => p.name !== name);
-          ColorPalette.saveUser(arr);
-          this._appliedPalette = null;
-          this.renderBar();
-          toast(`Deleted "${name}"`);
-        }
-      });
-    };
+    if ($("ed-orbit"))         $("ed-orbit").onclick         = () => this.orbitAll(false);
+    if ($("ed-orbit-reverse")) $("ed-orbit-reverse").onclick = () => this.orbitAll(true);
     if ($("ed-ring-even")) {
       $("ed-ring-even").onclick = () => {
         if (!this._ring) return;
@@ -611,11 +455,59 @@ export const Editor = {
       };
     }
     this._refreshVelocityInspector();
-    $("ed-clear").onclick = () => {
-      this.pushHistory();
-      World.circles = []; World.player = null; World.gravityCenters = [];
+    // ⚙ Level… opens the level-wide settings modal (Type, bounds,
+    // colors / theme, victory, drift, wells). Always available.
+    if ($("ed-level-settings")) {
+      $("ed-level-settings").onclick = () => UI.openLevelSettings();
+    }
+    // File menu — toggle visibility on the trigger; clicking outside or
+    // on any item closes it. The items themselves keep their original
+    // IDs / handlers so behavior is unchanged.
+    const closeFileMenu = () => {
+      const menu = $("ed-file-menu");
+      if (menu) menu.classList.add("hidden");
     };
-    if ($("ed-json-toggle")) $("ed-json-toggle").onclick = () => JsonPanel.toggle();
+    if ($("ed-file-toggle")) {
+      $("ed-file-toggle").onclick = e => {
+        e.stopPropagation();
+        const menu = $("ed-file-menu");
+        if (!menu) return;
+        const willOpen = menu.classList.contains("hidden");
+        menu.classList.toggle("hidden");
+        if (willOpen) {
+          // Defer attaching the outside-click closer by one frame so the
+          // click that opened the menu doesn't immediately close it.
+          setTimeout(() => {
+            const off = ev => {
+              if (menu.classList.contains("hidden")) {
+                document.removeEventListener("click", off);
+                return;
+              }
+              if (!menu.contains(ev.target) && ev.target.id !== "ed-file-toggle") {
+                menu.classList.add("hidden");
+                document.removeEventListener("click", off);
+              }
+            };
+            document.addEventListener("click", off);
+          }, 0);
+        }
+      };
+    }
+    // Clear / Show JSON live in both the File ▾ menu (normal mode) and
+    // inline in the test-mode cluster, so guard with `if ($(...))`.
+    if ($("ed-clear")) {
+      $("ed-clear").onclick = () => {
+        closeFileMenu();
+        this.pushHistory();
+        World.circles = []; World.player = null; World.gravityCenters = [];
+      };
+    }
+    if ($("ed-json-toggle")) {
+      $("ed-json-toggle").onclick = () => {
+        closeFileMenu();
+        JsonPanel.toggle();
+      };
+    }
     if (this.testCaseMode) {
       const tc = this.testCaseMode;
       $("ed-test-save").onclick = () => this.saveTestCase();
@@ -633,12 +525,12 @@ export const Editor = {
       };
       $("ed-test-done").onclick = () => this.exitTestCase();
     } else {
-      $("ed-save").onclick  = () => this.save();
-      $("ed-load").onclick  = () => this.load();
-      $("ed-export").onclick = () => this.exportLevel();
-      $("ed-import").onclick = () => this.importLevel();
-      $("ed-play").onclick  = () => this.play();
-      $("ed-back").onclick  = () => this.exit();
+      if ($("ed-save"))   $("ed-save").onclick   = () => { closeFileMenu(); this.save(); };
+      if ($("ed-load"))   $("ed-load").onclick   = () => { closeFileMenu(); this.load(); };
+      if ($("ed-export")) $("ed-export").onclick = () => { closeFileMenu(); this.exportLevel(); };
+      if ($("ed-import")) $("ed-import").onclick = () => { closeFileMenu(); this.importLevel(); };
+      if ($("ed-back"))   $("ed-back").onclick   = () => { closeFileMenu(); this.exit(); };
+      if ($("ed-play"))   $("ed-play").onclick   = () => this.play();
     }
 
     if (focusId) {

@@ -289,10 +289,30 @@
   .hidden { display: none !important; }
   .editor-bar {
     position: fixed; top: 0; left: 0; right: 0;
-    background: rgba(4, 12, 22, 0.85); padding: 8px 12px;
+    background: rgba(4, 12, 22, 0.85);
     border-bottom: 1px solid rgba(120, 200, 255, 0.2);
-    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    display: flex; flex-direction: column;
     font-size: 12px;
+  }
+  /* Row 1 (always visible) and Row 2 (contextual: shape primitive
+     controls when Tool=Shape, or selection inspector + alignment
+     when ≥1 circle is selected). Both wrap on narrow viewports. */
+  .ed-bar-row-1 {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    padding: 8px 12px;
+  }
+  .ed-bar-row-2 {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    padding: 6px 14px;
+    background: rgba(4, 12, 22, 0.45);
+    border-top: 1px solid rgba(120, 200, 255, 0.08);
+    position: relative;
+  }
+  .ed-bar-row-2::before {
+    content: "";
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: rgba(140, 220, 255, 0.4);
   }
   .editor-bar label { display: flex; gap: 4px; align-items: center; }
   .editor-bar select, .editor-bar input, .editor-bar button {
@@ -302,10 +322,122 @@
   }
   .editor-bar button { cursor: pointer; }
   .editor-bar button:hover { background: rgba(60, 120, 180, 0.6); }
+  .editor-bar button:disabled { opacity: 0.4; cursor: not-allowed; }
   .editor-bar select:focus, .editor-bar input:focus, .editor-bar button:focus {
     outline: none;
     border-color: rgba(180, 240, 255, 0.85);
     box-shadow: 0 0 0 2px rgba(120, 200, 255, 0.35);
+  }
+  /* Right-side cluster on Row 1 — pushed to the far edge. */
+  .ed-right-cluster {
+    margin-left: auto;
+    display: inline-flex; gap: 8px; align-items: center;
+  }
+  /* Primary "▶ Play" — accented to read as the goal action. */
+  .editor-bar .ed-play {
+    background: linear-gradient(180deg, rgba(80, 180, 220, 0.32), rgba(30, 90, 140, 0.22));
+    border-color: rgba(160, 220, 255, 0.7);
+    box-shadow: 0 0 14px rgba(80, 180, 220, 0.25) inset;
+    padding: 4px 18px; letter-spacing: 1.5px; font-weight: 500;
+  }
+  .editor-bar .ed-play:hover {
+    background: linear-gradient(180deg, rgba(100, 200, 240, 0.42), rgba(40, 110, 160, 0.28));
+  }
+  /* Tooltip hint icon for the Kind dropdown — replaces the inline kind
+     description text that used to live next to the dropdown. */
+  .ed-info-icon {
+    cursor: help; opacity: 0.45; font-size: 12px;
+    margin-left: -4px; user-select: none;
+  }
+  .ed-info-icon:hover { opacity: 0.9; }
+  /* Pill marking the active selection in Row 2. */
+  .ed-sel-chip {
+    background: rgba(120, 200, 255, 0.22);
+    border: 1px solid rgba(140, 220, 255, 0.5);
+    color: #fff;
+    padding: 2px 10px; border-radius: 11px;
+    font-size: 11px; letter-spacing: 0.5px;
+  }
+  .ed-divider {
+    width: 1px; align-self: stretch;
+    background: rgba(120, 200, 255, 0.2); margin: 0 4px;
+  }
+  .ed-test-chip {
+    opacity: 0.85; padding: 2px 8px;
+    border: 1px solid rgba(120, 200, 255, 0.3); border-radius: 4px;
+    background: rgba(40, 80, 120, 0.4);
+    font-size: 11px; letter-spacing: 0.5px;
+  }
+  /* "File ▾" dropdown — workflow actions (Save / Load / Export /
+     Import / Clear / Show JSON / Back to menu). */
+  .ed-file-wrap { position: relative; display: inline-flex; }
+  .ed-file-menu {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    background: rgba(4, 12, 22, 0.96);
+    border: 1px solid rgba(120, 200, 255, 0.32);
+    border-radius: 6px; padding: 4px 0;
+    min-width: 160px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+    z-index: 60;
+  }
+  .ed-file-menu .item {
+    padding: 5px 14px; cursor: pointer; font-size: 12px;
+    color: #d8efff;
+  }
+  .ed-file-menu .item:hover { background: rgba(120, 200, 255, 0.18); }
+  .ed-file-menu .sep {
+    height: 1px; background: rgba(120, 200, 255, 0.15); margin: 4px 0;
+  }
+  /* "⚙ Level…" modal panel — opened from the bar; holds level-wide
+     metadata that was historically inline in the toolbar. */
+  .ls-panel {
+    text-align: left; padding: 22px 28px 18px;
+    max-width: 560px; min-width: 480px;
+  }
+  .ls-panel h2 {
+    margin: 0 0 14px; font-weight: 300;
+    letter-spacing: 4px; font-size: 18px;
+    text-align: center; opacity: 0.92;
+  }
+  .ls-section {
+    margin: 16px 0 8px; padding-bottom: 4px;
+    border-bottom: 1px solid rgba(120, 200, 255, 0.12);
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; opacity: 0.5;
+  }
+  .ls-section .ls-count {
+    opacity: 0.6; font-size: 10px; margin-left: 6px;
+  }
+  .ls-row {
+    display: flex; align-items: center; gap: 12px; margin: 7px 0;
+  }
+  .ls-row .ls-label {
+    width: 110px; opacity: 0.62; font-size: 12px; flex-shrink: 0;
+  }
+  .ls-row .ls-ctrl {
+    flex: 1; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  }
+  .ls-panel .ls-hint { opacity: 0.45; font-size: 11px; }
+  .ls-panel input, .ls-panel select, .ls-panel button {
+    background: rgba(20, 40, 60, 0.7); color: #d8efff;
+    border: 1px solid rgba(120, 200, 255, 0.28);
+    border-radius: 4px; padding: 3px 8px; font-size: 12px;
+    font-family: inherit;
+  }
+  .ls-panel button { cursor: pointer; }
+  .ls-panel button:hover { background: rgba(60, 120, 180, 0.6); }
+  .ls-panel button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ls-panel input[type="color"] {
+    width: 32px; height: 22px; padding: 0; border: none; background: transparent;
+  }
+  .ls-panel input[type="checkbox"] { width: 14px; height: 14px; }
+  .ls-footer {
+    display: flex; justify-content: flex-end; gap: 8px;
+    margin-top: 18px; padding-top: 12px;
+    border-top: 1px solid rgba(120, 200, 255, 0.12);
+  }
+  .ls-footer .ls-done {
+    padding: 6px 18px; min-width: 80px; text-align: center;
   }
   .editor-help {
     position: fixed; left: 0; right: 0; bottom: 0;

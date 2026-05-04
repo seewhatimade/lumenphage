@@ -49,7 +49,7 @@ Object.assign(Editor, {
     const avg = distSum / N;
     const radius = avg > 1 ? avg : 200;
     this.pushHistory();
-    this._ring = { anchor, motes, radius, evenSpacing: false };
+    this._ring = { anchor, motes, radius, evenSpacing: true };
     this._applyRingPositions();
   },
 
