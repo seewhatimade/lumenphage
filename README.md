@@ -26,7 +26,7 @@ The bundled HTML embeds the JS bundle and every level as inline data, so it work
 
 ```sh
 npm install
-npm run serve      # python3 -m http.server on :8000
+npm run serve      # tiny Node static server on :8000
 # then open http://localhost:8000
 ```
 
@@ -618,7 +618,7 @@ lumenphage/
 
 | Script | What it does |
 |---|---|
-| `npm run serve` | `python3 -m http.server 8000` — dev mode against per-file modules. |
+| `npm run serve` | `node scripts/serve.mjs` — tiny dependency-free static server on :8000, dev mode against per-file modules. Set `PORT=…` to override. |
 | `npm run build` | esbuild bundle → `dist/index.html`. Single self-contained file. |
 | `npm run check` | `node --check` every module file (as ESM). Fast syntax-only pass. |
 | `npm test` | Schema / branch / shape tests on the level JSON. |

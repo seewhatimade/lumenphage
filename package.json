@@ -5,7 +5,7 @@
   "description": "A bioluminescent drift in dark water — eat what is smaller than you. Single-file canvas game.",
   "type": "module",
   "scripts": {
-    "serve": "python3 -m http.server 8000",
+    "serve": "node scripts/serve.mjs",
     "check": "node scripts/check.mjs",
     "extract-levels": "node scripts/extract-levels.mjs",
     "build": "node scripts/build.mjs",
