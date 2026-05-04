@@ -173,30 +173,40 @@ Object.assign(Editor, {
   //                        `end` (the cursor); drag length is the line.
   //   ricochet === true  → ignore drag length entirely. Walk from
   //                        `start` in the direction (end - start),
-  //                        terminating each segment at a wall hit.
+  //                        bouncing off the playable-area boundary —
+  //                        the same boundary the runtime collides
+  //                        circles against, so `−` carves and `+`
+  //                        circle/polygon walls reflect the path.
+  //                        Falls back to bounds-only reflection when
+  //                        the level has no Shape (legacy single-rect).
   //                        Total segments = bounces + 1; the last one
   //                        terminates at a wall instead of reflecting.
-  // If `start` falls outside bounds we degrade gracefully to the simple
-  // straight segment so the user still sees something.
+  // If `start` is outside the playable area we degrade gracefully to
+  // the simple straight segment so the user still sees something.
   _buildLineRicochets(start, end, ricochet, bounces) {
     if (!ricochet) {
       return [{ a: { x: start.x, y: start.y }, b: { x: end.x, y: end.y } }];
     }
     const b = World.bounds;
+    const shape = World.shape;
+    const hasShape = Array.isArray(shape) && shape.length > 0;
     const dx = end.x - start.x, dy = end.y - start.y;
     const len = Math.hypot(dx, dy);
     if (len < 1e-6) return [{ a: { x: start.x, y: start.y }, b: { x: end.x, y: end.y } }];
-    const inBox = (p) =>
-      p.x >= b.x - 1e-3 && p.x <= b.x + b.w + 1e-3 &&
-      p.y >= b.y - 1e-3 && p.y <= b.y + b.h + 1e-3;
-    if (!inBox(start)) return [{ a: { x: start.x, y: start.y }, b: { x: end.x, y: end.y } }];
+    const insideStart = hasShape
+      ? Shape.isInside(shape, start.x, start.y)
+      : (start.x >= b.x - 1e-3 && start.x <= b.x + b.w + 1e-3 &&
+         start.y >= b.y - 1e-3 && start.y <= b.y + b.h + 1e-3);
+    if (!insideStart) return [{ a: { x: start.x, y: start.y }, b: { x: end.x, y: end.y } }];
     let dir = { x: dx / len, y: dy / len };
     let cur = { x: start.x, y: start.y };
     const segments = [];
     const total = Math.max(1, (bounces | 0) + 1);   // segments to draw
     const FAR = Math.max(b.w, b.h) * 2;             // fallback span when no wall hit
     for (let i = 0; i < total; i++) {
-      const hit = this._rayHitBoundsWall(cur, dir, b);
+      const hit = hasShape
+        ? this._rayHitShapeWall(cur, dir, shape)
+        : this._rayHitBoundsWall(cur, dir, b);
       if (!hit) {
         segments.push({
           a: { x: cur.x, y: cur.y },
@@ -209,7 +219,9 @@ Object.assign(Editor, {
       if (i < total - 1) {
         const dn = dir.x * hit.nx + dir.y * hit.ny;
         dir = { x: dir.x - 2 * dn * hit.nx, y: dir.y - 2 * dn * hit.ny };
-        cur = hp;
+        // Nudge a hair off the wall along the new direction so the next
+        // iteration doesn't immediately re-hit the same edge at t≈0.
+        cur = { x: hp.x + dir.x * 1e-3, y: hp.y + dir.y * 1e-3 };
       }
     }
     return segments;
@@ -239,6 +251,82 @@ Object.assign(Editor, {
     if (dir.y >  eps) consider((b.y + b.h - from.y) / dir.y,  0, -1, "y");
     if (dir.y < -eps) consider((b.y       - from.y) / dir.y,  0,  1, "y");
     return best;
+  },
+  // Shape-aware first-wall hit. Walks every primitive in the shape,
+  // intersects the ray against its edges (4 line segments for a rect,
+  // N for a polygon, full circle for a circle), validates each hit
+  // against the union boundary so edges buried inside other primitives
+  // don't trigger a phantom bounce, and returns the smallest positive-
+  // t hit with a playable-area-outward normal. For `−` carves the
+  // primitive-local outward normal points into the carve; we flip it
+  // here so reflection treats the carve like a wall facing the player.
+  _rayHitShapeWall(from, dir, shape) {
+    const eps = 1e-3;
+    let best = null;
+    const consider = (t, nx, ny, hpx, hpy, p) => {
+      if (t <= eps) return;
+      if (!Shape._onUnionBoundary(p, hpx, hpy, nx, ny, shape)) return;
+      const fnx = (p.sign === "-") ? -nx : nx;
+      const fny = (p.sign === "-") ? -ny : ny;
+      if (!best || t < best.t) best = { t, nx: fnx, ny: fny };
+    };
+    for (const p of shape) {
+      if (p.type === "rect") {
+        const l = p.cx - p.w / 2, t0 = p.cy - p.h / 2;
+        const r = p.cx + p.w / 2, btm = p.cy + p.h / 2;
+        const edges = [
+          [l, t0,  r, t0,   0, -1],
+          [r, t0,  r, btm,  1,  0],
+          [r, btm, l, btm,  0,  1],
+          [l, btm, l, t0,  -1,  0],
+        ];
+        for (const [x0, y0, x1, y1, nx, ny] of edges) {
+          const tHit = this._raySegmentT(from, dir, x0, y0, x1, y1);
+          if (tHit === null) continue;
+          consider(tHit, nx, ny, from.x + dir.x * tHit, from.y + dir.y * tHit, p);
+        }
+      } else if (p.type === "polygon") {
+        const pts = p.points;
+        for (let i = 0; i < pts.length; i++) {
+          const v0 = pts[i], v1 = pts[(i + 1) % pts.length];
+          const ex = v1.x - v0.x, ey = v1.y - v0.y;
+          const elen = Math.hypot(ex, ey);
+          if (elen < 1e-9) continue;
+          // CW (y-down) winding → outward normal = (dy, -dx) / |d|.
+          const nx = ey / elen, ny = -ex / elen;
+          const tHit = this._raySegmentT(from, dir, v0.x, v0.y, v1.x, v1.y);
+          if (tHit === null) continue;
+          consider(tHit, nx, ny, from.x + dir.x * tHit, from.y + dir.y * tHit, p);
+        }
+      } else if (p.type === "circle") {
+        const ox = from.x - p.cx, oy = from.y - p.cy;
+        const B = 2 * (ox * dir.x + oy * dir.y);
+        const C = ox * ox + oy * oy - p.r * p.r;
+        const disc = B * B - 4 * C;                  // dir is unit, A=1
+        if (disc < 0) continue;
+        const sq = Math.sqrt(disc);
+        for (const tHit of [(-B - sq) / 2, (-B + sq) / 2]) {
+          if (tHit <= eps) continue;
+          const hpx = from.x + dir.x * tHit;
+          const hpy = from.y + dir.y * tHit;
+          consider(tHit, (hpx - p.cx) / p.r, (hpy - p.cy) / p.r, hpx, hpy, p);
+        }
+      }
+    }
+    return best;
+  },
+  // Ray-vs-line-segment in 2D. Returns the ray parameter t (≥ 0 when
+  // in front of the ray's origin) at which `from + t*dir` crosses the
+  // segment from (x0, y0) to (x1, y1), or null when they don't meet.
+  _raySegmentT(from, dir, x0, y0, x1, y1) {
+    const sx = x1 - x0, sy = y1 - y0;
+    const det = sx * dir.y - sy * dir.x;
+    if (Math.abs(det) < 1e-12) return null;
+    const ax = x0 - from.x, ay = y0 - from.y;
+    const t = (sx * ay - sy * ax) / det;
+    const u = (dir.x * ay - dir.y * ax) / det;
+    if (u < -1e-9 || u > 1 + 1e-9) return null;
+    return t;
   },
   _commitLineMode() {
     if (!this._lineMode || !this._lineMode.start || !this._lineMode.end) return;
